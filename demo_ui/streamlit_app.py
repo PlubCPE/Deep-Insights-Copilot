@@ -1,19 +1,16 @@
 import streamlit as st
 import requests
 import pandas as pd
-import os
 from datetime import date
-
-database_url_env = os.getenv('DATABASE_URL')
 
 st.set_page_config(page_title="Deep Insights Copilot — Streamlit Demo", layout="wide")
 
 # Configurable API URL via secrets or environment fallback
-API_URL ="http://localhost:8000/ask"
+API_URL = "http://localhost:8000/ask"
 TIMEOUT = 30
 
 st.title("Deep Insights Copilot — Streamlit Demo UI")
-st.markdown("Use this UI to ask questions, test LLM connectivity, and test database connectivity.")
+st.markdown("Use this UI to ask questions and test LLM connectivity. The **Test LLM** button sends a short prompt designed to verify the LLM responds.")
 
 with st.sidebar:
     st.header("Demo Controls")
@@ -60,11 +57,10 @@ with col1:
             st.subheader("Raw response JSON")
             st.json(data)
 
-st.markdown("---")
-st.header("Database Connectivity Test")
-st.subheader("LLM Connectivity Test")
-st.markdown("Press the button below to run a quick connectivity test. This sends a short, deterministic instruction to the LLM via the `/ask` endpoint and checks for a specific token in the response.")
-if st.button("Test LLM"):
+with col2:
+    st.subheader("LLM Connectivity Test")
+    st.markdown("Press the button below to run a quick connectivity test. This sends a short, deterministic instruction to the LLM via the `/ask` endpoint and checks for a specific token in the response.")
+    if st.button("Test LLM"):
         # Use a deterministic test token the LLM should return verbatim
         test_token = "LLM_CONNECT_OK"
         test_question = f"LLM CONNECTION TEST: Respond exactly with the single token: {test_token} and nothing else."
@@ -91,35 +87,5 @@ if st.button("Test LLM"):
             st.subheader("Raw response JSON")
             st.json(data)
 
-# New DB test area
 st.markdown("---")
-st.header("Database Connectivity Test")
-st.markdown("This test attempts to connect directly to the Postgres database and run `SELECT * FROM raw.customers LIMIT 20`.\n\nThe Streamlit process will try to read the database URL from (in order): `st.secrets['DATABASE_URL']`, query param `db_url`, or the environment variable `DATABASE_URL`. If `psycopg` is not installed in this environment, the test will tell you how to install it.")
-
-db_url = "postgresql://postgres:Plubzay_01@localhost:5432/Deep Insights Copilot"
-if db_url:
-    st.write("Using database URL from configuration.")
-else:
-    st.warning("No DATABASE_URL found. Please set st.secrets['DATABASE_URL'], pass ?db_url=... in the URL, or set the DATABASE_URL environment variable where Streamlit runs. Example: postgresql://demo:demopw@localhost:5432/deep_insights")
-
-if st.button("Test DB (SELECT * FROM raw.customers)"):
-    if not db_url:
-        st.error("Cannot run DB test — no DATABASE_URL configured.")
-    else:
-        try:
-            import psycopg
-        except Exception as e:
-            st.error("Missing required package 'psycopg'. Install it with: pip install psycopg[binary]")
-            st.stop()
-        with st.spinner("Connecting to database and running query..."):
-            try:
-                conn = psycopg.connect(db_url, autocommit=True)
-                with conn.cursor() as cur:
-                    cur.execute('SELECT customer_id, full_name, email, phone, signup_date, customer_segment FROM raw.customers LIMIT 20;')
-                    cols = [c.name for c in cur.description]
-                    rows = cur.fetchall()
-                df = pd.DataFrame(rows, columns=cols)
-                st.success(f"Query returned {len(df)} rows.")
-                st.dataframe(df)
-            except Exception as e:
-                st.error(f"DB query failed: {e}")
+st.markdown("Notes: For the LLM test to pass, the API server must be reachable and the backend must be configured to use an LLM provider (OpenRouter/OpenAI). If you use OpenRouter with Llama 3.3 8B, ensure `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` are set in the API environment.")
