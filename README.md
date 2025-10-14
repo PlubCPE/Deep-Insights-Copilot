@@ -8,7 +8,7 @@ This repository contains a working demo of an AI-powered assistant that answers 
 
 ## Prerequisites
 - Python 3.10+
-- PostgreSQL (local or Docker). Example DB name used in examples: `deep_insights_copilot` (you can change this)
+- PostgreSQL (local or Docker). Example DB name used in examples: `Deep Insights Copilot` (you can change this)
 - Optional: Docker & docker-compose (recommended to avoid polluting system Python)
 - Optional: OpenRouter API key if you want to use **Llama 3.3 8B** for real LLM responses.
 
@@ -17,7 +17,7 @@ This repository contains a working demo of an AI-powered assistant that answers 
 ## Important environment variables (.env)
 Create a `.env` at project root (there is a template in the repo). Example values:
 ```
-DATABASE_URL=postgresql://postgres:Plubzay_01@localhost:5432/deep_insights_copilot
+DATABASE_URL=postgresql://postgres:Plubzay_01@localhost:5432/Deep Insights Copilot
 MCP_URL=http://localhost:9000
 OPENROUTER_API_KEY=or-REPLACE_WITH_KEY
 OPENROUTER_MODEL=llama-3.3-8b
