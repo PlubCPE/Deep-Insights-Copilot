@@ -53,7 +53,7 @@ uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 6. Run Streamlit demo UI:
 ```bash
-streamlit run demo_ui/streamlit_app.py
+streamlit run demo_ui/streamlit.py
 # default: http://localhost:8501
 ```
 
@@ -61,43 +61,7 @@ streamlit run demo_ui/streamlit_app.py
 - If you don't set `OPENROUTER_API_KEY`, the app will return a deterministic **stub** answer for offline demos.
 - If MCP is run in Docker Compose the MCP service name `mcp_server` is reachable by name inside containers; for local runs use `http://localhost:9000`.
 
----
-
-## Quick start — Docker (recommended)
-If you prefer Docker, add an `api` and `mcp_server` service to `docker-compose.yml` and pass `.env` as `env_file`. Example snippet for the `api` service (add to your compose file):
-```yaml
-services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Plubzay_01
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-  mcp_server:
-    build: ./mcp_server
-    env_file: ./.env
-    command: uvicorn mcp_server.server:app --host 0.0.0.0 --port 9000 --reload
-    depends_on:
-      - postgres
-
-  api:
-    build: ./api
-    env_file: ./.env
-    command: uvicorn api.app.main:app --host 0.0.0.0 --port 8000 --reload
-    depends_on:
-      - mcp_server
-      - postgres
-
-volumes:
-  pgdata:
-```
-Then run:
-```bash
-docker-compose up --build
-```
-
+  
 ---
 
 ## Ingest KB (docs → analytics.kb_docs)
@@ -157,31 +121,3 @@ curl -X POST "http://localhost:8000/ask" -H "Content-Type: application/json" \
 # LLM health
 curl http://localhost:8000/health/llm | jq
 ```
-
----
-
-## Troubleshooting tips
-- `getaddrinfo failed` when API calls MCP → `MCP_URL` is pointing to `http://mcp_server:9000` but you're running API on host; change `MCP_URL` to `http://localhost:9000` (or run both in Docker compose).
-- `database "..." does not exist` → create DB or update `DATABASE_URL` to an existing DB.
-- If LLM returns `STUB ANSWER` → either LLM key not set or LLM call failed. Check `/health/llm` and ensure `OPENROUTER_API_KEY`/`OPENAI_API_KEY` are in the API process environment and restart the API.
-- If `analytics.kb_docs` is empty → run `mcp_server/ingest_kb.py` to populate from `/mnt/data/project_dataset/docs`.
-- For vector similarity, ensure `pgvector` is installed and the `embedding` column type matches the embedding dimension (if using real embeddings). The demo code falls back to `ILIKE` when `pgvector` isn't available.
-
----
-
-## Security and production notes
-- This is a prototype. **Do not** expose the `/tools/call` endpoint publicly without auth and rigorous SQL safeguards. In production:
-  - Use named, parameterized templates for SQL (do not accept raw SQL from clients).
-  - Harden PII handling, masking, and access controls.
-  - Use a proper secrets manager for API keys.
-  - Add rate-limiting and authentication on all endpoints.
-
----
-
-## Want help?
-Tell me which action you'd like next — I can:
-- write a `create_schema.sql` that builds the tables and indexes,
-- generate dbt models for the analytics schema,
-- convert this to a Docker Compose manifest that runs Postgres, MCP, API, and Streamlit together,
-- or run a sample `/ask` here (using stub LLM) and show the JSON response.
-
