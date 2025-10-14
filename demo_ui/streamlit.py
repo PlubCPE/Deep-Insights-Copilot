@@ -4,12 +4,9 @@ import pandas as pd
 import os
 from datetime import date
 
-database_url_env = os.getenv('DATABASE_URL')
-
 st.set_page_config(page_title="Deep Insights Copilot — Streamlit Demo", layout="wide")
 
-# Configurable API URL via secrets or environment fallback
-API_URL ="http://localhost:8000/ask"
+API_URL = "http://localhost:8000/ask"
 TIMEOUT = 30
 
 st.title("Deep Insights Copilot — Streamlit Demo UI")
@@ -50,6 +47,19 @@ with col1:
         # Display results
         st.subheader("Answer")
         st.markdown(data.get("answer", "No answer returned."))
+        # Show KPI used
+        if data.get("kpi_used"):
+            st.subheader("KPI / Tool Output Used")
+            try:
+                kpi_df = pd.DataFrame(data["kpi_used"])
+                st.dataframe(kpi_df)
+            except Exception:
+                st.json(data["kpi_used"])
+        # Show warnings
+        if data.get("warnings"):
+            st.subheader("Warnings / Tool Errors")
+            for w in data["warnings"]:
+                st.warning(f'{w.get("step")}: {w.get("error")}')
         if data.get("provenance"):
             st.subheader("Provenance / Tool Calls")
             st.json(data["provenance"])
@@ -60,12 +70,10 @@ with col1:
             st.subheader("Raw response JSON")
             st.json(data)
 
-st.markdown("---")
-st.header("Database Connectivity Test")
-st.subheader("LLM Connectivity Test")
-st.markdown("Press the button below to run a quick connectivity test. This sends a short, deterministic instruction to the LLM via the `/ask` endpoint and checks for a specific token in the response.")
-if st.button("Test LLM"):
-        # Use a deterministic test token the LLM should return verbatim
+with col2:
+    st.subheader("LLM Connectivity Test")
+    st.markdown("Press the button below to run a quick connectivity test. This sends a short, deterministic instruction to the LLM via the `/ask` endpoint and checks for a specific token in the response.")
+    if st.button("Test LLM"):
         test_token = "LLM_CONNECT_OK"
         test_question = f"LLM CONNECTION TEST: Respond exactly with the single token: {test_token} and nothing else."
         payload = {"question": test_question, "params": {}}
@@ -78,7 +86,6 @@ if st.button("Test LLM"):
                 st.error(f"LLM test failed to call API: {e}")
                 st.stop()
         answer = data.get("answer", "") or ""
-        # Simple check: does the expected token appear in the returned answer?
         if test_token in answer:
             st.success("LLM test succeeded — model returned the expected token.")
             st.write("Returned answer:")
@@ -91,7 +98,7 @@ if st.button("Test LLM"):
             st.subheader("Raw response JSON")
             st.json(data)
 
-# New DB test area
+# DB Test area left unchanged
 st.markdown("---")
 st.header("Database Connectivity Test")
 st.markdown("This test attempts to connect directly to the Postgres database and run `SELECT * FROM raw.customers LIMIT 20`.\n\nThe Streamlit process will try to read the database URL from (in order): `st.secrets['DATABASE_URL']`, query param `db_url`, or the environment variable `DATABASE_URL`. If `psycopg` is not installed in this environment, the test will tell you how to install it.")
@@ -115,7 +122,7 @@ if st.button("Test DB (SELECT * FROM raw.customers)"):
             try:
                 conn = psycopg.connect(db_url, autocommit=True)
                 with conn.cursor() as cur:
-                    cur.execute('SELECT customer_id, full_name, email, phone, signup_date, customer_segment FROM raw.customers LIMIT 20;')
+                    cur.execute('SELECT * FROM analytics.dim_customer LIMIT 20;')
                     cols = [c.name for c in cur.description]
                     rows = cur.fetchall()
                 df = pd.DataFrame(rows, columns=cols)
@@ -123,3 +130,9 @@ if st.button("Test DB (SELECT * FROM raw.customers)"):
                 st.dataframe(df)
             except Exception as e:
                 st.error(f"DB query failed: {e}")
+
+st.markdown("""
+Notes:
+- For Docker / compose, point DATABASE_URL to the 'postgres' service (e.g. postgresql://demo:demopw@postgres:5432/deep_insights).
+- If running Streamlit locally, ensure the Postgres port is reachable and credentials are correct.
+""")
