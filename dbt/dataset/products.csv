@@ -1,0 +1,11 @@
+product_id,product_name,category,release_version,launch_date
+1,dBank Core,Wallet,v2.2,26/1/2024
+2,dBank Wallet,Core,v3.3,5/12/2022
+3,dBank Savings,Core,v1.5,25/5/2025
+4,dBank Lending,Core,v1.1,23/6/2023
+5,dBank Merchant,Lending,v2.1,11/11/2024
+6,dBank Mobile App,Lending,v1.2,11/7/2021
+7,dBank API Gateway,Wallet,v2.0,1/2/2023
+8,dBank Rewards,Wallet,v1.3,5/7/2024
+9,dBank Insights,Core,v2.5,6/7/2021
+10,dBank Pay,Mobile,v1.3,9/6/2021

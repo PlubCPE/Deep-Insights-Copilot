@@ -1,0 +1,9 @@
+name: 'Deep Insights Copilot'
+version: '1.0'
+config-version: 2
+profile: 'default'
+
+
+models:
+Deep Insights Copilot:
++materialized: view

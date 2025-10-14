@@ -1,0 +1,6 @@
+logins_by_app_version:
+  params:
+    app_channel: {type: text, allowed: ['virtual_bank_app', 'web', 'app', 'call']}
+    start_date: {type: timestamp}
+    end_date: {type: timestamp}
+    top_n: {type: int, max: 100}

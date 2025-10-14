@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+postgres:
+image: postgres:18
+environment:
+POSTGRES_USER: postgres
+POSTGRES_PASSWORD: Plubzay_01
+POSTGRES_DB: Deep Insights Copilot
+ports:
+- "5432:5432"
+volumes:
+- pgdata:/var/lib/postgresql/data
+command: ["postgres", "-c", "shared_preload_libraries=pgvector"]
+
+
+api:
+build: ./api
+depends_on:
+- postgres
+- mcp_server
+ports: 
+- "8000:8000"
+environment:
+DATABASE_URL: postgres://demo:demopw@postgres:5432/deep_insights
+MCP_URL: http://mcp_server:9000
+
+
+mcp_server:
+build: ./mcp_server
+depends_on:
+- postgres
+ports:
+- "9000:9000"
+environment:
+DATABASE_URL: postgres://postgres:Plubzay_01@localhost:5432/Deep Insights Copilot
+
+
+volumes:
+pgdata:

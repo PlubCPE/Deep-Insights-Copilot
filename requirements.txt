@@ -1,0 +1,14 @@
+# requirements.txt - Python dependencies for Deep Insights Copilot (backend + ingestion + MCP)
+fastapi
+uvicorn[standard]
+psycopg[binary]
+httpx
+pydantic
+python-dotenv
+pgvector
+openai
+sqlalchemy
+asyncpg
+pytest
+streamlit
+pandas
