@@ -47,7 +47,3 @@ Data and Model Requirements
 ● Customer Product Holding
 ● Product knowledge base/ (5–10 short markdown files with known issues, condition, policies, release
 notes)
-Submission Details
-● Deadline: 5 Days after received exam
-● Submission Format: GitHub link or zipped project folder
-● Contact for Support: joey@data.co.th
